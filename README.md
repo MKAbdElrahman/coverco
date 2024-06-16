@@ -2,7 +2,8 @@
 
 ### Purpose
 
-Coverco is a tool designed to analyze the test coverage percentage of each package within a Go module. It allows setting specific coverage thresholds per package, excludes certain packages from analysis, provides configurable logging options, and supports command-line overrides for enhanced flexibility. Coverco is designed to fine-tune the coverage percentages for core business logic. It is meant to be part of a CI/CD pipeline or to provide developers with a useful tool to see how much of their code is tested and gain confidence in their tests. Additionally, it helps ignore some noisy coverage that downgrades the overall coverage and has no comparable value to the core logic.
+Coverco is designed to fine-tune the coverage percentages for the logical components of the design. It is meant to be part of a CI/CD pipeline or to provide developers with a useful tool to see how much of their code is tested and gain confidence in their tests. Additionally, it helps ignore some noisy coverages that have negligible value.
+
 
 ### Features
 
