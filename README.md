@@ -2,8 +2,7 @@
 
 ### Purpose
 
-Coverco is designed to fine-tune the coverage percentages for the logical components of the design. It is meant to be part of a CI/CD pipeline or to provide developers with a useful tool to see how much of their code is tested and gain confidence in their tests. Additionally, it helps ignore some noisy coverages that have negligible value.
-
+Coverco is designed to fine-tune coverage percentages for logical components of the application. It is intended to integrate seamlessly into CI/CD pipelines or serve as a valuable tool for developers to assess their code's test coverage and enhance test confidence. Additionally, Coverco helps filter out noisy coverages that contribute minimally to overall value.
 
 ### Features
 
