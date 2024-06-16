@@ -71,12 +71,62 @@ logging:
    - `-log-level`: Log level (`debug`, `info`, `warn`, `error`; default: `info`).
    - `-log-file`: Log file path (default: log to stdout).
    - `-keep-reports`: Keep coverage reports after printing (default: `false`).
+   - `-exclude`: Comma-separated list of package patterns to exclude (e.g., `-exclude=demo/exclude/*,demo/skip/*`).
 
 5. **Configuration Priority**:
    - Command-line flags have the highest priority.
    - YAML configuration file values have higher priority than defaults.
    - Internal defaults are used if neither flags nor configuration file values are provided.
 
+
+### Quick Example
+
+```bash
+❯ git clone https://github.com/fyne-io/fyne.git
+❯ git cd fyne
+
+❯ coverco  -exclude  "*/cmd/*,*/driver/*,*/app" -default-threshold 70
+2024/06/17 01:06:28 INFO Running go mod tidy...
+2024/06/17 01:06:28 INFO Excluding package: fyne.io/fyne/v2/app
+2024/06/17 01:06:28 INFO Excluding package: fyne.io/fyne/
+.
+.
+.
+
++-------------------------------------------+---------------------+-----------+
+|               PACKAGE NAME                | COVERAGE PERCENTAGE | THRESHOLD |
++-------------------------------------------+---------------------+-----------+
+| fyne.io/fyne/v2                           | 65.80%              | 70.00%    |
+| fyne.io/fyne/v2/canvas                    | 59.80%              | 70.00%    |
+| fyne.io/fyne/v2/container                 | 86.20%              | 70.00%    |
+| fyne.io/fyne/v2/data/binding              | 43.40%              | 70.00%    |
+| fyne.io/fyne/v2/data/validation           | 88.20%              | 70.00%    |
+| fyne.io/fyne/v2/dialog                    | 79.70%              | 70.00%    |
+| fyne.io/fyne/v2/driver                    | 100.00%             | 70.00%    |
+| fyne.io/fyne/v2/internal                  | 69.40%              | 70.00%    |
+| fyne.io/fyne/v2/internal/animation        | 77.90%              | 70.00%    |
+| fyne.io/fyne/v2/internal/async            | 54.50%              | 70.00%    |
+| fyne.io/fyne/v2/internal/cache            | 61.60%              | 70.00%    |
+| fyne.io/fyne/v2/internal/color            | 16.40%              | 70.00%    |
+| fyne.io/fyne/v2/internal/driver           | 90.80%              | 70.00%    |
+| fyne.io/fyne/v2/internal/painter          | 52.10%              | 70.00%    |
+| fyne.io/fyne/v2/internal/painter/gl       | 0.00%               | 70.00%    |
+| fyne.io/fyne/v2/internal/painter/software | 92.10%              | 70.00%    |
+| fyne.io/fyne/v2/internal/repository       | 86.10%              | 70.00%    |
+| fyne.io/fyne/v2/internal/repository/mime  | 100.00%             | 70.00%    |
+| fyne.io/fyne/v2/internal/scale            | 0.00%               | 70.00%    |
+| fyne.io/fyne/v2/internal/svg              | 60.60%              | 70.00%    |
+| fyne.io/fyne/v2/internal/test             | 68.20%              | 70.00%    |
+| fyne.io/fyne/v2/internal/widget           | 88.80%              | 70.00%    |
+| fyne.io/fyne/v2/layout                    | 94.50%              | 70.00%    |
+| fyne.io/fyne/v2/storage                   | 62.00%              | 70.00%    |
+| fyne.io/fyne/v2/storage/repository        | 47.40%              | 70.00%    |
+| fyne.io/fyne/v2/test                      | 63.80%              | 70.00%    |
+| fyne.io/fyne/v2/theme                     | 57.10%              | 70.00%    |
+| fyne.io/fyne/v2/tools/playground          | 0.00%               | 70.00%    |
+| fyne.io/fyne/v2/widget                    | 92.20%              | 70.00%    |
++-------------------------------------------+---------------------+-----------+
+```
 
 
 ### Contributions

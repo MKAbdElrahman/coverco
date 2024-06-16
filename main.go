@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/mkabdelrahman/coverco/finder"
 	"github.com/mkabdelrahman/coverco/printer"
@@ -24,6 +25,7 @@ func main() {
 	logLevel := flag.String("log-level", "info", "Log level (debug, info, warn, error)")
 	logFile := flag.String("log-file", "", "Log file (default: log to stdout)")
 	keepReports := flag.Bool("keep-reports", false, "Keep coverage reports after printing (default: false)")
+	excludePatterns := flag.String("exclude", "", "Comma-separated list of package patterns to exclude")
 
 	flag.Parse()
 
@@ -43,7 +45,7 @@ func main() {
 	}
 
 	// Override config with flags if they are set
-	overrideConfigWithFlags(&config, defaultCoverageThreshold, coverageReportsDir, logLevel, logFile)
+	overrideConfigWithFlags(&config, defaultCoverageThreshold, excludePatterns, coverageReportsDir, logLevel, logFile)
 
 	// Setup logging
 	err = setupLogging(config)
@@ -120,9 +122,11 @@ func loadConfiguration(configFilePath string) (conf.Config, error) {
 }
 
 // overrideConfigWithFlags overrides configuration values with command line flags
-func overrideConfigWithFlags(config *conf.Config, defaultCoverageThreshold *float64, coverageReportsDir, logLevel, logFile *string) {
+func overrideConfigWithFlags(config *conf.Config, defaultCoverageThreshold *float64, excludePatterns, coverageReportsDir, logLevel, logFile *string) {
 	config.DefaultCoverageThreshold = *defaultCoverageThreshold
 	config.CoverageReportsDir = *coverageReportsDir
 	config.Logging.Level = *logLevel
 	config.Logging.File = *logFile
+	config.ExcludePackages = append(config.ExcludePackages, strings.Split(*excludePatterns, ",")...)
+
 }
