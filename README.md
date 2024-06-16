@@ -1,6 +1,8 @@
 ## Coverco
 
-Coverco is a tool designed to analyze the test coverage percentage of each package within a Go module. It allows setting specific coverage thresholds per package, excludes certain packages from analysis, provides configurable logging options, and supports command-line overrides for enhanced flexibility.
+### Purpose
+
+Coverco is designed to fine-tune the coverage percentages for core business logic. It is meant to be part of a CI/CD pipeline or to provide developers with a useful tool to see how much of their code is tested. Additionally, it helps ignore some noisy coverage that downgrades the overall coverage and has no comparable value to the core logic.
 
 ### Features
 
@@ -8,16 +10,6 @@ Coverco is a tool designed to analyze the test coverage percentage of each packa
 - **Exclusions**: Exclude specific packages from coverage analysis.
 - **Logging**: Configure logging levels and optionally log to a file.
 - **Command-Line Flags**: Override default configurations using command-line flags.
-
-### Purpose
-
-Coverco is designed to fine-tune the coverage percentages for the core business logic of your application. It is intended to be a part of a CI/CD pipeline or used by developers to:
-
-- Ensure critical business logic is thoroughly tested.
-- Provide an easy-to-use tool to visualize test coverage.
-- Exclude noisy coverage that downgrades the overall coverage percentage but has little value to the core logic.
-
-By focusing on meaningful test coverage, Coverco helps maintain high code quality and reliability in key areas of your application.
 
 ### Configuration
 
@@ -69,16 +61,23 @@ logging:
    coverco [flags...] [dir]
    ```
 
-   - `[flags...]`: Optional flags to override default configurations. See the list of available flags below.
-   - `[dir]`: Optional path to the folder to list Go packages. Defaults to the current directory (`"."`) if not provided.
+   - Replace `config.yaml` with your actual configuration file path. If no `-config` flag is provided, Coverco will use internal defaults.
+   - `[dir]` is the path to the folder to list Go packages, with a default value of `.`.
 
 4. **Command-Line Flags**:
-   - `-config`: Path to the configuration file (default: `config.yaml` if exists).
+   - `-config`: Path to the configuration file (optional; default: `config.yaml`).
    - `-default-threshold`: Default coverage threshold (default: `80.0`).
    - `-coverage-dir`: Directory for coverage reports (default: `./coverage_reports`).
    - `-log-level`: Log level (`debug`, `info`, `warn`, `error`; default: `info`).
    - `-log-file`: Log file path (default: log to stdout).
    - `-keep-reports`: Keep coverage reports after printing (default: `false`).
+
+5. **Configuration Priority**:
+   - Command-line flags have the highest priority.
+   - YAML configuration file values have higher priority than defaults.
+   - Internal defaults are used if neither flags nor configuration file values are provided.
+
+
 
 ### Contributions
 
