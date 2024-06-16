@@ -1,11 +1,13 @@
 package finder
 
 import (
-	"github.com/mkabdelrahman/coverco/conf"
 	"fmt"
+	"os"
 	"os/exec"
 	"regexp"
 	"strings"
+
+	"github.com/mkabdelrahman/coverco/conf"
 
 	"github.com/charmbracelet/log"
 )
@@ -144,6 +146,12 @@ func matchPattern(packageName string, patterns []string) (bool, error) {
 
 // listGoPackages lists all Go packages in the specified folder and its subdirectories
 func ListGoPackages(folder string) ([]string, error) {
+	// Run go mod tidy first
+	err := runGoModTidy()
+	if err != nil {
+		return nil, fmt.Errorf("error running go mod tidy: %w", err)
+	}
+
 	cmd := exec.Command("go", "list", "./...")
 	cmd.Dir = folder
 	output, err := cmd.Output()
@@ -152,4 +160,18 @@ func ListGoPackages(folder string) ([]string, error) {
 	}
 	packages := strings.Fields(string(output))
 	return packages, nil
+}
+
+// runGoModTidy runs 'go mod tidy' in the current directory
+func runGoModTidy() error {
+	log.Info("Running go mod tidy...")
+
+	cmd := exec.Command("go", "mod", "tidy")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("error running go mod tidy: %w", err)
+	}
+	return nil
 }
