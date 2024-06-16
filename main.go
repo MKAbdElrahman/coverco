@@ -14,21 +14,32 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-func main() {
-	log.SetLevel(log.DebugLevel)
+// check if config yaml is supplied and use it if exitst
+// if not load the defaults
+// ovveride with any command line flags supplied
 
-	// Define a command line flag for the configuration file path
-	configFilePath := flag.String("config", "config.yaml", "Path to the configuration file")
+func main() {
+	// Define command line flags
+	configFilePath := flag.String("config", "", "Path to the configuration file")
 	dirPath := flag.String("dir", ".", "Path to the folder to list Go packages")
+	defaultCoverageThreshold := flag.Float64("default-threshold", 80.0, "Default coverage threshold")
+	coverageReportsDir := flag.String("coverage-dir", "./coverage_reports", "Directory for coverage reports")
+	logLevel := flag.String("log-level", "info", "Log level (debug, info, warn, error)")
+	logFile := flag.String("log-file", "", "Log file (default: log to stdout)")
+	keepReports := flag.Bool("keep-reports", false, "Keep coverage reports after printing (default: false)")
 
 	flag.Parse()
+	// Load configuration from YAML file or use defaults if config flag is not set
 
-	// Load configuration from YAML file
-	config, err := conf.LoadConfig(*configFilePath)
+	// Load configuration
+	config, err := loadConfiguration(*configFilePath)
 	if err != nil {
 		log.Errorf("Error loading config: %s", err.Error())
 		return
 	}
+
+	// Override config with flags if they are set
+	overrideConfigWithFlags(&config, defaultCoverageThreshold, coverageReportsDir, logLevel, logFile)
 
 	// Setup logging
 	err = setupLogging(config)
@@ -55,10 +66,11 @@ func main() {
 	// printer.PrintCoverageResults(coverages)
 	printer.PrintCoverageTable(coverages)
 
-	// Remove the coverage reports directory
-	err = os.RemoveAll(config.CoverageReportsDir)
-	if err != nil {
-		log.Errorf("Error removing coverage reports directory: %s", err.Error())
+	if !*keepReports {
+		err = os.RemoveAll(config.CoverageReportsDir)
+		if err != nil {
+			log.Errorf("Error removing coverage reports directory: %s", err.Error())
+		}
 	}
 }
 
@@ -93,4 +105,21 @@ func setupLogging(cfg conf.Config) error {
 	}
 
 	return nil
+}
+
+// loadConfiguration loads the configuration from YAML file if provided, or returns defaults
+func loadConfiguration(configFilePath string) (conf.Config, error) {
+	if configFilePath != "" {
+		return conf.LoadConfig(configFilePath)
+	}
+	return conf.GetDefaultConfig(), nil
+}
+
+// overrideConfigWithFlags overrides configuration values with command line flags
+func overrideConfigWithFlags(config *conf.Config, defaultCoverageThreshold *float64, coverageReportsDir, logLevel, logFile *string) {
+	config.DefaultCoverageThreshold = *defaultCoverageThreshold
+	config.CoverageReportsDir = *coverageReportsDir
+	config.Logging.Level = *logLevel
+	config.Logging.File = *logFile
+
 }

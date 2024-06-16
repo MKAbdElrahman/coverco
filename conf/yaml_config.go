@@ -7,6 +7,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const DefaultThreshold = 80.0
+
 // Config represents the YAML configuration file structure
 type Config struct {
 	DefaultCoverageThreshold float64 `yaml:"default_coverage_threshold"`
@@ -36,4 +38,24 @@ func LoadConfig(configFilePath string) (Config, error) {
 	}
 
 	return config, nil
+}
+func GetDefaultConfig() Config {
+	return Config{
+		DefaultCoverageThreshold: DefaultThreshold,
+		CoverageReportsDir:       "./coverage_reports",
+		CoverPackages: []struct {
+			Name      string   `yaml:"name"`
+			Threshold *float64 `yaml:"threshold,omitempty"`
+		}{
+			{Name: "*", Threshold: nil}, // Default cover all packages
+		},
+		ExcludePackages: nil, // Assuming no packages excluded by default
+		Logging: struct {
+			Level string `yaml:"level"`
+			File  string `yaml:"file,omitempty"`
+		}{
+			Level: "info",
+			File:  "", // Empty file path means log to stdout by default
+		},
+	}
 }
