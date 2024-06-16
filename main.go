@@ -14,14 +14,11 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-// check if config yaml is supplied and use it if exitst
-// if not load the defaults
-// ovveride with any command line flags supplied
-
 func main() {
+	log.SetLevel(log.DebugLevel)
+
 	// Define command line flags
 	configFilePath := flag.String("config", "", "Path to the configuration file")
-	dirPath := flag.String("dir", ".", "Path to the folder to list Go packages")
 	defaultCoverageThreshold := flag.Float64("default-threshold", 80.0, "Default coverage threshold")
 	coverageReportsDir := flag.String("coverage-dir", "./coverage_reports", "Directory for coverage reports")
 	logLevel := flag.String("log-level", "info", "Log level (debug, info, warn, error)")
@@ -29,9 +26,16 @@ func main() {
 	keepReports := flag.Bool("keep-reports", false, "Keep coverage reports after printing (default: false)")
 
 	flag.Parse()
-	// Load configuration from YAML file or use defaults if config flag is not set
 
-	// Load configuration
+	// The first non-flag argument is the directory path
+	var dirPath string
+	if flag.NArg() > 0 {
+		dirPath = flag.Arg(0)
+	} else {
+		dirPath = "."
+	}
+
+	// Load configuration from YAML file or use defaults if config flag is not set
 	config, err := loadConfiguration(*configFilePath)
 	if err != nil {
 		log.Errorf("Error loading config: %s", err.Error())
@@ -48,7 +52,7 @@ func main() {
 		return
 	}
 
-	packages, err := finder.FilterCoveredPackages(config, *dirPath)
+	packages, err := finder.FilterCoveredPackages(config, dirPath)
 	if err != nil {
 		fmt.Printf("Failed to create packages list: %v\n", err)
 		return
@@ -63,9 +67,9 @@ func main() {
 
 	// Print coverage results
 	printer := printer.NewCoveragePrinter(reporter, os.Stdout)
-	// printer.PrintCoverageResults(coverages)
 	printer.PrintCoverageTable(coverages)
 
+	// Remove the coverage reports directory if keepReports flag is not set
 	if !*keepReports {
 		err = os.RemoveAll(config.CoverageReportsDir)
 		if err != nil {
@@ -121,5 +125,4 @@ func overrideConfigWithFlags(config *conf.Config, defaultCoverageThreshold *floa
 	config.CoverageReportsDir = *coverageReportsDir
 	config.Logging.Level = *logLevel
 	config.Logging.File = *logFile
-
 }

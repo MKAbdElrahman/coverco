@@ -9,6 +9,16 @@ Coverco is a tool designed to analyze the test coverage percentage of each packa
 - **Logging**: Configure logging levels and optionally log to a file.
 - **Command-Line Flags**: Override default configurations using command-line flags.
 
+### Purpose
+
+Coverco is designed to fine-tune the coverage percentages for the core business logic of your application. It is intended to be a part of a CI/CD pipeline or used by developers to:
+
+- Ensure critical business logic is thoroughly tested.
+- Provide an easy-to-use tool to visualize test coverage.
+- Exclude noisy coverage that downgrades the overall coverage percentage but has little value to the core logic.
+
+By focusing on meaningful test coverage, Coverco helps maintain high code quality and reliability in key areas of your application.
+
 ### Configuration
 
 Configuration is managed via a YAML file (`config.yaml` by default) with the following structure:
@@ -56,14 +66,14 @@ logging:
 3. **Run Coverco**:
 
    ```sh
-   coverco -config=config.yaml
+   coverco [flags...] [dir]
    ```
 
-   - Replace `config.yaml` with your actual configuration file path. If no `-config` flag is provided, Coverco will use internal defaults.
+   - `[flags...]`: Optional flags to override default configurations. See the list of available flags below.
+   - `[dir]`: Optional path to the folder to list Go packages. Defaults to the current directory (`"."`) if not provided.
 
 4. **Command-Line Flags**:
-   - `-config`: Path to the configuration file (default: `config.yaml`).
-   - `-dir`: Path to the folder to list Go packages.
+   - `-config`: Path to the configuration file (default: `config.yaml` if exists).
    - `-default-threshold`: Default coverage threshold (default: `80.0`).
    - `-coverage-dir`: Directory for coverage reports (default: `./coverage_reports`).
    - `-log-level`: Log level (`debug`, `info`, `warn`, `error`; default: `info`).
@@ -73,4 +83,3 @@ logging:
 ### Contributions
 
 Contributions are welcome! Please fork the repository and submit pull requests for any improvements you'd like to make.
-
