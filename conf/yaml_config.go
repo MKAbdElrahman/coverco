@@ -13,7 +13,9 @@ const DefaultThreshold = 80.0
 type Config struct {
 	DefaultCoverageThreshold float64 `yaml:"default_coverage_threshold"`
 	CoverageReportsDir       string  `yaml:"coverage_reports_dir"`
-	CoverPackages            []struct {
+	CoverageReportsFormat    string  `yaml:"coverage_reports_format"`
+
+	CoverPackages []struct {
 		Name      string   `yaml:"name"`
 		Threshold *float64 `yaml:"threshold,omitempty"`
 	} `yaml:"cover_packages"`
@@ -43,6 +45,7 @@ func GetDefaultConfig() Config {
 	return Config{
 		DefaultCoverageThreshold: DefaultThreshold,
 		CoverageReportsDir:       "./coverage_reports",
+		CoverageReportsFormat:    "out",
 		CoverPackages: []struct {
 			Name      string   `yaml:"name"`
 			Threshold *float64 `yaml:"threshold,omitempty"`

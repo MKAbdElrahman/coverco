@@ -2,10 +2,12 @@
 
 ### Purpose
 
-Coverco is designed to fine-tune coverage percentages for logical components of the application. It is intended to integrate seamlessly into CI/CD pipelines or serve as a tool for developers to assess their code's test coverage. Additionally, Coverco helps filter out noisy coverages that contribute minimally to overall value.
+Coverco is designed to fine-tune coverage percentages. It is intended to integrate seamlessly into CI/CD pipelines or serve as a tool for developers to assess their code's test coverage. Additionally, Coverco helps filter out noisy coverages that contribute minimally to overall value.
+It can be intgrated with VSCode for a great developemnt experience.
 
 
 ### Features
+
 
 - **Thresholds**: Define coverage thresholds for individual packages or patterns.
 - **Exclusions**: Exclude specific packages from coverage analysis.
@@ -22,6 +24,9 @@ default_coverage_threshold: 80.0
 
 # Directory to save coverage reports
 coverage_reports_dir: "coverage_reports"
+
+# File Format of coverage reports
+coverage-reports-format: "lcov"
 
 # List of package coverage configurations
 cover_packages:
@@ -48,6 +53,12 @@ logging:
 
 ### Usage
 
+0. **Install gcov2lcov**: Used to convert golang test coverage to lcov format.
+
+```sh
+go install github.com/jandelgado/gcov2lcov@latest
+```
+
 1. **Install Coverco**: Install the `Coverco` tool.
 
    ```sh
@@ -69,6 +80,7 @@ logging:
    - `-config`: Path to the configuration file (optional; default: `config.yaml`).
    - `-default-threshold`: Default coverage threshold (default: `80.0`).
    - `-coverage-dir`: Directory for coverage reports (default: `./coverage_reports`).
+   - `-coverage-reports-format`: Format for coverage reports (default: `lcov`).
    - `-log-level`: Log level (`debug`, `info`, `warn`, `error`; default: `info`).
    - `-log-file`: Log file path (default: log to stdout).
    - `-keep-reports`: Keep coverage reports after printing (default: `false`).
@@ -129,6 +141,15 @@ logging:
 +-------------------------------------------+---------------------+-----------+
 ```
 
+
+## Integration with VSCode
+
+Launch VS Code Quick Open (Ctrl+P), paste the following command, and press enter.
+```
+ext install ryanluker.vscode-coverage-gutters
+```
+
+Then modify the base direcotry in the extension settings to `coverage-dir`.
 
 ### Contributions
 

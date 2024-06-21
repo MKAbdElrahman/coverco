@@ -1,7 +1,6 @@
 package reporter
 
 import (
-	"github.com/mkabdelrahman/coverco/finder"
 	"fmt"
 	"os"
 	"os/exec"
@@ -11,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/log"
+	"github.com/mkabdelrahman/coverco/finder"
 )
 
 var (
@@ -29,22 +29,23 @@ type CoverageReporter struct {
 	Packages                 []finder.Package
 	DefaultCoverageThreshold float64
 	ReportsDir               string
+	OutputFormat             string
 }
 
 // NewCoverageReporter creates a new CoverageReporter instance
-func NewCoverageReporter(packages []finder.Package, defaultThreshold float64, reportsDir string) (*CoverageReporter, error) {
+func NewCoverageReporter(packages []finder.Package, defaultThreshold float64, reportsDir, outputFormat string) (*CoverageReporter, error) {
 
 	// Ensure the coverage reports directory exists
 	err := ensureDir(reportsDir)
 	if err != nil {
 		return nil, fmt.Errorf("error ensuring coverage reports directory: %s", err.Error())
-
 	}
 
 	return &CoverageReporter{
 		Packages:                 packages,
 		DefaultCoverageThreshold: defaultThreshold,
 		ReportsDir:               reportsDir,
+		OutputFormat:             outputFormat,
 	}, nil
 }
 
@@ -76,7 +77,26 @@ func (cr *CoverageReporter) testSinglePackage(pkg finder.Package) Coverage {
 		return Coverage{PackageName: pkg.Name, Percentage: 0}
 	}
 
+	if cr.OutputFormat == "lcov" {
+		lcovFile := strings.Replace(coverProfileName, ".out", ".lcov", 1)
+		err = convertToLcov(coverProfileName, lcovFile)
+		if err != nil {
+			log.Errorf("Error converting coverage profile to lcov for package %s: %s", pkg.Name, err.Error())
+			return Coverage{PackageName: pkg.Name, Percentage: coverage, CoverageFile: coverProfileName}
+		}
+		return Coverage{PackageName: pkg.Name, Percentage: coverage, CoverageFile: lcovFile}
+	}
+
 	return Coverage{PackageName: pkg.Name, Percentage: coverage, CoverageFile: coverProfileName}
+}
+
+// convertToLcov converts a Go coverage profile to lcov format using gcov2lcov
+func convertToLcov(inputFile, outputFile string) error {
+	cmd := exec.Command("gcov2lcov", "-infile", inputFile, "-outfile", outputFile)
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to convert to lcov: %w", err)
+	}
+	return nil
 }
 
 // extractCoveragePercentage extracts the coverage percentage from the command output

@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/mkabdelrahman/coverco/finder"
@@ -22,9 +23,10 @@ func main() {
 	configFilePath := flag.String("config", "", "Path to the configuration file")
 	defaultCoverageThreshold := flag.Float64("default-threshold", 80.0, "Default coverage threshold")
 	coverageReportsDir := flag.String("coverage-dir", "./coverage_reports", "Directory for coverage reports")
+	coverageReportsFormat := flag.String("coverage-reports-format", "lcov", "Output format for coverage reports (out or lcov) (default: lcov)")
 	logLevel := flag.String("log-level", "info", "Log level (debug, info, warn, error)")
 	logFile := flag.String("log-file", "", "Log file (default: log to stdout)")
-	keepReports := flag.Bool("keep-reports", false, "Keep coverage reports after printing (default: false)")
+	keepReports := flag.Bool("keep-reports", true, "Keep coverage reports after printing (default: true)")
 	excludePatterns := flag.String("exclude", "", "Comma-separated list of package patterns to exclude")
 
 	flag.Parse()
@@ -45,7 +47,7 @@ func main() {
 	}
 
 	// Override config with flags if they are set
-	overrideConfigWithFlags(&config, defaultCoverageThreshold, excludePatterns, coverageReportsDir, logLevel, logFile)
+	overrideConfigWithFlags(&config, defaultCoverageThreshold, excludePatterns, coverageReportsDir, coverageReportsFormat, logLevel, logFile)
 
 	// Setup logging
 	err = setupLogging(config)
@@ -60,9 +62,10 @@ func main() {
 		return
 	}
 
-	reporter, err := reporter.NewCoverageReporter(packages, config.DefaultCoverageThreshold, config.CoverageReportsDir)
+	reporter, err := reporter.NewCoverageReporter(packages, config.DefaultCoverageThreshold, config.CoverageReportsDir, config.CoverageReportsFormat)
 	if err != nil {
 		log.Errorf("%s", err.Error())
+		return
 	}
 
 	coverages := reporter.TestPackages()
@@ -70,14 +73,27 @@ func main() {
 	// Print coverage results
 	printer := printer.NewCoveragePrinter(reporter, os.Stdout)
 	printer.PrintCoverageTable(coverages)
-
-	// Remove the coverage reports directory if keepReports flag is not set
 	if !*keepReports {
 		err = os.RemoveAll(config.CoverageReportsDir)
 		if err != nil {
 			log.Errorf("Error removing coverage reports directory: %s", err.Error())
 		}
 	}
+
+	if *keepReports && *coverageReportsFormat == "lcov" {
+		err = removeFilesWithExtension(config.CoverageReportsDir, ".out")
+		if err != nil {
+			log.Errorf("Error removing .lcov files: %s", err.Error())
+		}
+	}
+
+	if *keepReports && *coverageReportsFormat == "out" {
+		err = removeFilesWithExtension(config.CoverageReportsDir, ".lcov")
+		if err != nil {
+			log.Errorf("Error removing .lcov files: %s", err.Error())
+		}
+	}
+
 }
 
 // setupLogging sets up logging based on the configuration
@@ -122,11 +138,36 @@ func loadConfiguration(configFilePath string) (conf.Config, error) {
 }
 
 // overrideConfigWithFlags overrides configuration values with command line flags
-func overrideConfigWithFlags(config *conf.Config, defaultCoverageThreshold *float64, excludePatterns, coverageReportsDir, logLevel, logFile *string) {
+func overrideConfigWithFlags(config *conf.Config, defaultCoverageThreshold *float64, excludePatterns, coverageReportsDir, coverageReportsFormat, logLevel, logFile *string) {
 	config.DefaultCoverageThreshold = *defaultCoverageThreshold
 	config.CoverageReportsDir = *coverageReportsDir
+	config.CoverageReportsFormat = *coverageReportsFormat
 	config.Logging.Level = *logLevel
 	config.Logging.File = *logFile
 	config.ExcludePackages = append(config.ExcludePackages, strings.Split(*excludePatterns, ",")...)
 
+}
+
+// removeFilesWithExtension removes files with the given extension in the specified directory
+func removeFilesWithExtension(dir, ext string) error {
+	files, err := filepath.Glob(filepath.Join(dir, "*"+ext))
+	if err != nil {
+		return fmt.Errorf("error finding files to delete: %w", err)
+	}
+
+	if len(files) > 0 {
+		log.Infof("Selected files for deletion: %v", files)
+	} else {
+		log.Infof("No files to delete with extension %s", ext)
+	}
+
+	for _, file := range files {
+		if err := os.Remove(file); err != nil {
+			log.Errorf("Error removing file %s: %s", file, err.Error())
+		} else {
+			log.Infof("Removed file %s", file)
+		}
+	}
+
+	return nil
 }
